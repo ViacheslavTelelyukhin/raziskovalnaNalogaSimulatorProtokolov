@@ -36,8 +36,7 @@ const createWindow = (): void => {
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 app.on('ready', createWindow);
@@ -137,7 +136,7 @@ ipcMain.handle(IPC_METHODS.START_TRACE, (event, data: traceStart[], layers: prot
       })
       
       w.loadURL(STATE_FOLLOWER_WINDOW_WEBPACK_ENTRY);
-      w.webContents.openDevTools();
+      // w.webContents.openDevTools();
       const tracer = await getTracer(
         packet => w.webContents.send('packets', packet),
         (setEther as any),
