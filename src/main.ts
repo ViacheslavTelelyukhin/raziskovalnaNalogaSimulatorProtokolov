@@ -141,15 +141,26 @@ ipcMain.handle(IPC_METHODS.START_TRACE, (event, data: traceStart[], layers: prot
       const tracer = await getTracer(
         packet => w.webContents.send('packets', packet),
         (setEther as any),
-        // pid => {tracerPID = pid},
+        error => {
+          console.error("Failed to start packet capture process encountered error: "+error);
+          w.close();
+          tracing[i] = null as any;
+          try{tracer?.kill()}catch(e){}
+        },
         data[i]
-      );
+      ).catch(err => {
+        console.error("Failed to start packet capture "+err);
+        w.close();
+        tracing[i] = null as any;
+      });
       w.on('close', () => {
         tracing[i] = null as any;
         //the process wil know to terminate
         //after our c code ends, the sudos and shells and the rest should clean themselves up
         //this is putting quite a bit of trust into the c proc though
-        tracer.stdin.write("KILL")
+        tracer?.stdin?.write("KILL", err => {
+          if(err) console.error("Error while telling packet capture process tp shut down "+err)
+        })
       })
     }
     resolve('done')

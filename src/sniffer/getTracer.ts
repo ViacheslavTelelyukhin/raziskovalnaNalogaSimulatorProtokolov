@@ -6,7 +6,7 @@ import { assert } from "node:console";
 export async function getTracer(
     sendPacketUp: (hex: string) => void,
     sendEtherType: (etherType: number) => void,
-    // setPid: (pid: number) => void,
+    error: (err: any) => void,
     data: traceStart
 ) {
     let proc;
@@ -24,7 +24,7 @@ export async function getTracer(
     let partial = Buffer.alloc(128*1024) //128k should be enough to hold even the largest packet
     let partialLen = 0
     let etherType: number, pid: number;
-    proc.on('error', (err: any) => console.log("process emitted error", err))
+    proc.on('error', (err: any) => error("process emitted error: "+err))
     proc.on('close', (code: any, signal: any) => console.log("process closed", code, signal))
     proc.stdout.on('data', (packet: Buffer) => {
         // if (pid === undefined) {
@@ -67,8 +67,7 @@ export async function getTracer(
         }
     })
     proc.stderr.on("data", (err: Buffer) => {
-        console.log("STDERR!!!", err.toString('hex'));
-        assert(false)
+        error("Process wrote to stderr (hex): "+err.toString('hex'))
     })
     console.log("started packet capture at pid:", proc.pid);
     

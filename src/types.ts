@@ -175,7 +175,6 @@ export class protocolLayer {
 
     @IsString()
     @IsOptional()
-    @Validate(IsFunction)
     //of type (props: {
     // outer: Record<string, any>,
     // etherType: number
@@ -214,7 +213,6 @@ export class frame {
     // functions for simulation
     @IsString()
     @IsOptional()
-    @Validate(IsFunction)
     //of type (props: {
     // inner: Uint8Array,
     // sendingToType: string, <- this is the key for the input value
@@ -227,7 +225,6 @@ export class frame {
 
     @IsString()
     @IsOptional()
-    @Validate(IsFunction)
     //of type (props: {
     // inner: Uint8Array,
     // sendingToType: string, <- this is the key for the input value
@@ -238,7 +235,6 @@ export class frame {
     segment?: string
     @IsString()
     @IsOptional()
-    @Validate(IsFunction)
     //of type (props: {
     // frame: Object, <- this is a parsed frame
     // sendingToType: string, <- this is the key for the input value
@@ -249,7 +245,6 @@ export class frame {
     defragment?: string
 
     @IsArray()
-    @Validate(IsFunction)
     checkFunctions?: string[] //these are saved as strings because we will eval them later
     //((fields: frameField[]) => boolean)[] //checks if the frame is valid
 }
@@ -340,7 +335,6 @@ export class automatonAction {
 class automatonLogicType {
     //returns an index for the descriptions array rather than a state name so we know if it goes out of bounds
     @IsString()
-    @Validate(IsFunction)
     func: string
 
     @ValidateNested({each:true})
