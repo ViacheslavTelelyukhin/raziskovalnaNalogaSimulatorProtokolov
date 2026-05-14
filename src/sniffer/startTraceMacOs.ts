@@ -6,6 +6,7 @@ export async function startTraceMacOs(data: traceStart): Promise<ChildProcessWit
     const device = await new Promise<string>((resolve, reject) => exec('route get '+data.ip, (err, out, errMessage) => {
         if (!err) {
             const idx = out.indexOf("interface: ")
+            if(idx == -1) reject('Invalid ip or incompatible OS')
             resolve(out.substring(idx+11, out.indexOf(' ', idx+11)-1))
         }
         reject("Invalid ip or incompatible OS")

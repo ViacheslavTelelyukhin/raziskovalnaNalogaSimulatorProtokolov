@@ -3,14 +3,18 @@ import { ChildProcessWithoutNullStreams, exec, spawn } from "node:child_process"
 import * as fs from "fs";
 
 export async function startTraceLinux(data: traceStart): Promise<ChildProcessWithoutNullStreams> {
-    const device = await new Promise<string>((resolve, reject) => exec('route get '+data.ip, (err, out, errMessage) => {
+    const device = await new Promise<string>((resolve, reject) => exec('ip route get '+data.ip, (err, out, errMessage) => {
         if (!err) {
-            const idx = out.indexOf("interface: ")
-            resolve(out.substring(idx+11, out.indexOf(' ', idx+11)-1))
+            const idx = out.indexOf(" dev ")
+            if(idx == -1) reject('Invalid ip or incompatible OS')
+            resolve(out.substring(idx+5, out.indexOf(' ', idx+5)-1))
         }
         reject("Invalid ip or incompatible OS")
     }))
     console.log("DEVICE:'"+device+"'");
-    let path = fs.existsSync('./src/sniffer/captureLinux') ? './src/sniffer/captureLinux' : '../Resources/captureLinux'
-    return spawn('sudo', [path, device, data.filter || ''])
+    let dirPath = fs.existsSync('./src/sniffer') ? './src/sniffer' : '../Resources'
+    return spawn('sudo -A', ["./captureLinux", device, data.filter || ''], {
+        env: {'SUDO_ASKPASS': './askPassLinux.sh'},
+        cwd: dirPath
+    })
 }
