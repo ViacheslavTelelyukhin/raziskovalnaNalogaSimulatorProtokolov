@@ -13,6 +13,13 @@ export async function startTraceMacOs(data: traceStart): Promise<ChildProcessWit
     }))
     console.log("DEVICE:'"+device+"'");
     // return spawn('osascript', ["-e", 'do shell script \"./a.out '+device+' '+(data.filter || '')+'\" with administrator privileges'])
-    let path = fs.existsSync('./src/sniffer/captureMacos') ? './src/sniffer/captureMacos' : '../Resources/captureMacos'
-    return spawn('sudo', [path, device, data.filter || ''])
+    let dirPath = fs.existsSync('./src/sniffer') ? './src/sniffer' : '../Resources'
+    return spawn("sudo -Av; sudo ", ['./captureMacos', device, '"'+data.filter+'"'], {
+        shell: true,
+        env: {
+            ...process.env,
+            'SUDO_ASKPASS': './askPassMacos.sh'
+        },
+        cwd: dirPath
+    })
 }

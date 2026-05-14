@@ -16,6 +16,7 @@ const config: ForgeConfig = {
     asar: true,
     extraResource: [
       "./src/sniffer/captureMacos",
+      "./src/sniffer/askPassMacos.sh",
       "./src/sniffer/captureLinux",
       "./src/sniffer/askPassLinux.sh",
     ]

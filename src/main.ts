@@ -138,10 +138,18 @@ ipcMain.handle(IPC_METHODS.START_TRACE, (event, data: traceStart[], layers: prot
       
       w.loadURL(STATE_FOLLOWER_WINDOW_WEBPACK_ENTRY);
       w.webContents.openDevTools();
-      const tracer = await getTracer(packet => w.webContents.send('packets', packet), (setEther as any), data[i]);
+      const tracer = await getTracer(
+        packet => w.webContents.send('packets', packet),
+        (setEther as any),
+        // pid => {tracerPID = pid},
+        data[i]
+      );
       w.on('close', () => {
         tracing[i] = null as any;
-        tracer.kill()
+        //the process wil know to terminate
+        //after our c code ends, the sudos and shells and the rest should clean themselves up
+        //this is putting quite a bit of trust into the c proc though
+        tracer.stdin.write("KILL")
       })
     }
     resolve('done')

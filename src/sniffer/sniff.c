@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <memory.h>
 #include <errno.h>
+// #include <stropts
+#include <sys/ioctl.h>
 
 //compile with: gcc -lpcap -o captureOsname ./sniff.c
 
@@ -21,6 +23,10 @@ int main(int argc, char *argv[])
 	memset(&header, 0, sizeof(header));
 	const u_char *packet;		/* The actual packet */
 	
+	// send pid to parent process so we can get killed
+	// int pid = getpid();
+	// write(1, &pid, 4);
+
 	/* Define the device */
 	if (dev == NULL) {
 		fprintf(stderr, "Couldn't find device: %s\n", errbuf);
@@ -58,7 +64,9 @@ int main(int argc, char *argv[])
 	
 	//sniff
 	size_t writtenHeader, writtenBody;
+	int n;
     while (1) {
+		if (ioctl(0, FIONREAD, &n) == 0 && n > 0) break;
         packet = pcap_next(handle, &header);
         //not sure why but sometimes we get length one packets
         if (header.caplen == 1 || packet == NULL) continue;

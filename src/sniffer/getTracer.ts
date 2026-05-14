@@ -1,27 +1,39 @@
 import { traceStart } from "../types";
+import { startTraceLinux } from "./startTraceLinux";
 import { startTraceMacOs } from "./startTraceMacOs";
 import { assert } from "node:console";
 
-export async function getTracer(sendPacketUp: (hex: string) => void, sendEtherType: (etherType: number) => void, data: traceStart) {
+export async function getTracer(
+    sendPacketUp: (hex: string) => void,
+    sendEtherType: (etherType: number) => void,
+    // setPid: (pid: number) => void,
+    data: traceStart
+) {
     let proc;
     switch (process.platform) {
         case 'darwin':
             proc = await startTraceMacOs(data)
             break;
         case 'linux':
-            // proc = await startTraceLinux(data)
-            // break;
+            proc = await startTraceLinux(data)
+            break;
         default:
             throw new Error("Platform unsupported")
     }
 
     let partial = Buffer.alloc(128*1024) //128k should be enough to hold even the largest packet
     let partialLen = 0
-    let etherType: number;
+    let etherType: number, pid: number;
     proc.on('error', (err: any) => console.log("process emitted error", err))
     proc.on('close', (code: any, signal: any) => console.log("process closed", code, signal))
     proc.stdout.on('data', (packet: Buffer) => {
+        // if (pid === undefined) {
+        //     pid = packet.readUInt32LE(0)
+        //     setPid(pid)
+        //     packet = packet.subarray(4)
+        // }
         if (etherType === undefined) {
+            if (packet.byteLength < 4) return
             etherType = packet.readUInt32LE(0)
             sendEtherType(etherType)
             packet = packet.subarray(4)
@@ -58,6 +70,8 @@ export async function getTracer(sendPacketUp: (hex: string) => void, sendEtherTy
         console.log("STDERR!!!", err.toString('hex'));
         assert(false)
     })
+    console.log("started packet capture at pid:", proc.pid);
+    
 
     return proc
 }

