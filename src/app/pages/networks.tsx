@@ -1,5 +1,5 @@
 import React, { SetStateAction, useCallback, useEffect, useRef, useState } from "react";
-import { device, deviceInterface, FLOW_NODE_TYPES, INTERFACE_INPUT_TYPES, layerInterface, network, project, simulationProgressType } from "../../types";
+import { device, deviceInterface, FLOW_NODE_TYPES, INTERFACE_INPUT_TYPES, IPC_METHODS, layerInterface, network, project, simulationProgressType, traceStart, windowWithApi } from "../../types";
 import { Button, Input, Modal, Popover, Space, Typography } from "antd/es";
 import { CloseOutlined, DeleteOutlined, DragOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { notify } from "../utils/notify";
@@ -187,7 +187,25 @@ export default function Networks({proj, setPage, setProj}: Props) {
     }
 
     const executeSimulation = () => {
-
+        //one layer at a time i assume
+        const network = proj?.networks?.[editingNetwork]
+        const layers = proj?.layers;
+        (window as windowWithApi).api.invoke(
+            IPC_METHODS.START_TRACE,
+            network.devices
+            .filter(device => device.ownedByApp)
+            .flatMap(device =>
+                device.interfaces.map(inf => ({
+                    ip: inf.ipConfig.addr,
+                    port: inf.ipConfig.port,
+                    automaton: inf.interfaces,
+                    name: network.name + ': ' + device.name + ' - ' + inf.name,
+                    filter: 'ip and port '+inf.ipConfig.port
+                } as traceStart))
+            ),
+            layers,
+            network.devices.flatMap(d => d.interfaces.map(dif => ({...dif, name: d.name+'§'+dif.name})))
+        )
     }
 
     // console.log(edges, nodes);
@@ -223,7 +241,7 @@ export default function Networks({proj, setPage, setProj}: Props) {
                             Opens a window for each device for you to control flow of packets
                         </div>}
                     >
-                        <Button onClick={executeSimulation} disabled>Launch manual traversal</Button>
+                        <Button onClick={executeSimulation}>Launch manual traversal</Button>
                     </Popover>
                     <Button 
                         onClick={() => {

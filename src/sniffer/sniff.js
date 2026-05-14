@@ -1,3 +1,6 @@
+//------SKRIPTA NAMENJENA ZGOLJ ZA TESTIRANJE-------
+
+
 // import { createSession, decode } from "pcap";
 // import proj from "./L2L3Decapsulator.json" with { type: "json" };
 
@@ -73,3 +76,92 @@
     
 //     //note for ethernet frames the preamble and trailer are not included
 // });
+
+// import { spawn } from "node:child_process";
+// import { assert } from "node:console";
+// import * as fs from "fs";
+
+// function send(packet, len, ethtype) {
+//     //seems as if it works as of right now.
+//     //will stress test first
+//     //if something works will add assertions
+//     console.log(packet.subarray(0, len).toString('hex'));
+// }
+// function logHeader(packet) {
+//     //seems as if it works as of right now.
+//     //will stress test first
+//     //if something works will add assertions
+//     console.log("len:", packet.readUInt32LE(20), "caplen:", packet.readUInt32LE(16), "timeval:", packet.readBigInt64LE(0));
+// }
+
+// const proc = spawn('sudo', ['./a.out', 'lo0', 'ip and port 80'])
+// // const proc = spawn('osascript', ["-e", "do shell script \"./a.out lo0\" with administrator privileges"])
+// let partial = Buffer.alloc(128*1024) //128k should be enough to hold even the largest packet
+// let partialLen = 0
+// let etherType;
+// let file = fs.createWriteStream('./log.txt')
+// proc.on('error', err => console.log("process emitted error", err))
+// proc.on('close', (code, signal) => console.log("process closed", code, signal))
+// proc.stdout.on('data', (packet) => {
+//     if (file) file.write(packet.toString('hex')+'\n')
+//     if (etherType === undefined) {
+//         etherType = packet.readUInt32LE(0)
+//         console.log("ETHERTYPE:", etherType);
+//         packet = packet.subarray(4)
+//     }
+//     // there is absolutely no way there will be less than 16 bits written like this.
+//     // I doubt that headers will ever be fractured
+//     if (partialLen && partialLen < 24) {
+//         assert(false)
+//         const wrsz = Math.min(24, packet.length)
+//         packet.copy(partial, partialLen, 0, wrsz)
+//         partialLen+=wrsz
+//         if (wrsz===packet.length)return
+//         packet = packet.subarray(wrsz)
+//     }
+//     if (partialLen) {
+//         assert(partialLen >= 24)
+//         const len = partial.readUInt32LE(20)
+//         if (len > partialLen+packet.length-24) {
+//             console.log("wrote whole to partial");
+            
+//             packet.copy(partial, partialLen, 0, packet.length)
+//             partialLen+=packet.length
+//             return
+//         } else {
+//             //copy up to the end of the packet
+//             packet.copy(partial, partialLen, 0, len+24-partialLen)
+//             //send it
+//             console.log('RECONSTRUCTED PACKET FROM PARTIALS!', packet.length, len, partialLen, len+24-partialLen);
+//             send(partial, len+24, etherType)
+//             packet = packet.subarray(len+24-partialLen)
+//             partialLen = 0
+//         }
+//     }
+//     //send packets from the message in a loop
+//     while (packet.length >= 24) {
+//         const len = packet.readUInt32LE(20)
+//         logHeader(packet)
+//         console.log('readlen', packet.length, "(", len+24>packet.length, ")");
+        
+//         if (len+24>packet.length) break
+//         //packet.copy(partial, partialLen, 0, len+24-partialLen)
+//         //send it
+//         console.log('got packet:',len+24, '/', packet.length);
+        
+//         send(packet, len+24, etherType)
+//         packet = packet.subarray(len+24)
+//     }
+//     //if there is any left put it in partial
+//     assert(partialLen === 0)
+//     if (packet.length) {
+//         packet.copy(partial, partialLen, 0, packet.length)
+//         console.log(packet.length, "PARTIAL");
+//         console.log(packet.toString('hex'));
+//         partialLen = packet.length
+//     }
+// })
+// proc.stderr.on("data", (err) => {
+//     console.log("STDERR!!!", err.toHex());
+//     assert(false)
+// })

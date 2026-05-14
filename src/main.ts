@@ -1,14 +1,18 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { IPC_CHANNELS, IPC_METHODS } from './types';
+import { automaton, device, deviceInterface, IPC_CHANNELS, IPC_METHODS, network, protocolLayer, traceStart } from './types';
 import * as fs from "fs";
+import { getTracer } from './sniffer/getTracer';
+import path from 'path';
 
 //declare constants for typescript
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+//this method may be nice for them on desktop but each window consumes around 100MB of RAM. Since there will rarely be 5+ automatons on a machine we eat the loss.
+declare const STATE_FOLLOWER_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+declare const STATE_FOLLOWER_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 //declare variables and constants
-let mainWindow: BrowserWindow = null
-const WORKING_DIRECTORY = './projects/'
+let mainWindow: BrowserWindow = null!
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // Not sure what this is
@@ -32,7 +36,7 @@ const createWindow = (): void => {
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // // Open the DevTools.
+  // Open the DevTools.
   mainWindow.webContents.openDevTools();
 };
 
@@ -49,34 +53,107 @@ app.on('activate', () => {
     createWindow();
 });
 
+function getAppDataPath() {
+  switch (process.platform) {
+    case "darwin": {
+      return path.join((process as any).env["HOME"], "Library", "Application Support", "ViacheslavTelelyukhinProtcolTool");
+    }
+    case "linux": {
+      return path.join((process as any).env["HOME"], ".ViacheslavTelelyukhinProtcolTool");
+    }
+    default: {
+      console.log("Unsupported platform!");
+      process.exit(1);
+    }
+  }
+}
+
 //handle ipc
 ipcMain.handle(IPC_METHODS.LIST_PROJECTS, (event) => {
   return new Promise((resolve, reject) => {
-    if (!fs.existsSync(WORKING_DIRECTORY)) fs.mkdirSync(WORKING_DIRECTORY)
-    fs.readdir(WORKING_DIRECTORY, (err, files) => {
-      if(err) reject(err)
+    const appDataDirPath = getAppDataPath();
+    if (!fs.existsSync(appDataDirPath)) fs.mkdirSync(appDataDirPath)
+    fs.readdir(appDataDirPath, (err, files) => {
+      if(err) return reject(err)
       resolve(files)
     })
   })
 })
 
-ipcMain.handle(IPC_METHODS.SAVE_FILE, (event, path, content) => {
+ipcMain.handle(IPC_METHODS.SAVE_FILE, (event, name, content) => {
   return new Promise((resolve, reject) => {
-    fs.writeFile(WORKING_DIRECTORY+path, content, 'utf8', (err) => {
-      if (err) reject(err)
+    const appDataDirPath = getAppDataPath();
+    if (!fs.existsSync(appDataDirPath)) {
+      fs.mkdirSync(appDataDirPath);
+    }
+    const appDataFilePath = path.join(appDataDirPath, name);
+    fs.writeFile(appDataFilePath, content, 'utf8', (err) => {
+      if (err) return reject(err)
       resolve('success')
     })
   })
 })
 
-ipcMain.handle(IPC_METHODS.READ_FILE, (event, path) => {
+ipcMain.handle(IPC_METHODS.READ_FILE, (event, name) => {
   return new Promise((resolve, reject) => {
-    fs.readFile(WORKING_DIRECTORY+path, 'utf8', (err, data) => {
-      if (err) reject(err)
+    const appDataDirPath = getAppDataPath();
+    if (!fs.existsSync(appDataDirPath)) {
+      fs.mkdirSync(appDataDirPath);
+    }
+    const appDataFilePath = path.join(appDataDirPath, name);
+    fs.readFile(appDataFilePath, 'utf8', (err, data) => {
+      if (err) return reject(err)
       resolve(data)
     })
   })
 })
 
+let tracing: (traceStart&{window: BrowserWindow, etherType: Promise<number>})[] = []
+let tracingLayers: protocolLayer[] = [];
+let tracingIfList: deviceInterface[] = [];
+ipcMain.handle(IPC_METHODS.START_TRACE, (event, data: traceStart[], layers: protocolLayer[], interfacesList: deviceInterface[]) => {
+  //data is port, filter string, automaton (with inputs configured)
+  return new Promise(async (resolve, reject) => {
+    if (tracing.find(t => t)) return reject("Must complete previous trace first")
+    else tracing = []
+    tracingLayers = layers
+    tracingIfList = interfacesList
+    for (let i = 0; i < data.length; i++) {
+      const w = new BrowserWindow({
+        height: 600,
+        width: 800,
+        webPreferences: {
+          preload: STATE_FOLLOWER_WINDOW_PRELOAD_WEBPACK_ENTRY,
+          webSecurity: true,
+          contextIsolation: true,
+        },
+      });
+      let setEther: Function = null as any;
+      tracing.push({...data[i], window: w,
+        //to je vsaj top 3 najbolj spranih odlomkov kode, ki sem ih kdarkoli napisal. Zadevas ne deluje kot race condition ampak je še vedno res grda
+        etherType: new Promise<number>((resolve, reject) => {
+          setEther = resolve
+        })
+      })
+      
+      w.loadURL(STATE_FOLLOWER_WINDOW_WEBPACK_ENTRY);
+      w.webContents.openDevTools();
+      const tracer = await getTracer(packet => w.webContents.send('packets', packet), (setEther as any), data[i]);
+      w.on('close', () => {
+        tracing[i] = null as any;
+        tracer.kill()
+      })
+    }
+    resolve('done')
+  })
+})
+ipcMain.handle(IPC_METHODS.GET_TRACING, (event) => {
+  return new Promise(async (resolve, reject) => {
+    const windowIndex = tracing.findIndex(t => t.window.webContents === event.sender)
+    if (windowIndex === -1) return reject("Can't find the window")
+    //console.log(tracing, windowIndex);
+    resolve({tracing: {...tracing[windowIndex], window: undefined, etherType: await tracing[windowIndex].etherType}, layers: tracingLayers, devices: tracingIfList})
+  })
+})
 
 console.log("Main script done");

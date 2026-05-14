@@ -1,0 +1,289 @@
+{
+  "name": "decapsulate Ether, IPv4",
+  "layers": [
+    {
+      "name": "Transport",
+      "frames": [
+        {
+          "name": "TCP",
+          "fields": [
+            {
+              "name": "source port",
+              "size": "16",
+              "represents": 5
+            },
+            {
+              "name": "dest port",
+              "size": "16",
+              "represents": 5
+            },
+            {
+              "name": "seq",
+              "size": "32",
+              "represents": 2
+            },
+            {
+              "name": "ack",
+              "size": "32",
+              "represents": 2
+            },
+            {
+              "name": "data offset",
+              "size": "4",
+              "represents": 0
+            },
+            {
+              "name": "reserved",
+              "size": "4",
+              "represents": 0
+            },
+            {
+              "name": "flags",
+              "size": "8",
+              "represents": 2
+            },
+            {
+              "name": "window",
+              "size": "16",
+              "represents": 2
+            },
+            {
+              "name": "checksum",
+              "size": "16",
+              "represents": 2
+            },
+            {
+              "name": "urgent pointer",
+              "size": "16",
+              "represents": 2
+            },
+            {
+              "name": "options",
+              "size": "function(f){return f['data offset']*32-160;}",
+              "represents": 2
+            },
+            {
+              "name": "Content",
+              "represents": 4,
+              "size": "-1"
+            }
+          ],
+          "checkFunctions": []
+        }, {
+          "name": "UDP",
+          "fields": [
+            {
+              "name": "source port",
+              "size": "16",
+              "represents": 5
+            },
+            {
+              "name": "dest port",
+              "size": "16",
+              "represents": 5
+            },
+            {
+              "name": "len",
+              "size": "16",
+              "represents": 5
+            },
+            {
+              "name": "checksum",
+              "size": "16",
+              "represents": 5
+            },
+            {
+              "name": "Content",
+              "represents": 4,
+              "size": "-1"
+            }
+          ],
+          "checkFunctions": []
+        }
+      ],
+      "determineFrameType": "function(f){return ({6: 'TCP', 17: 'UDP'})[f['outer']['Protocol']];}",
+      "roles": []
+    }, {
+      "name": "IPv4",
+      "frames": [
+        {
+          "name": "IPv4",
+          "fields": [
+            {
+              "name": "Version",
+              "size": "4",
+              "represents": 0
+            },
+            {
+              "name": "Header size",
+              "size": "4",
+              "represents": 0
+            },
+            {
+              "name": "DSCP",
+              "size": "6",
+              "represents": 2
+            },
+            {
+              "name": "ECN",
+              "size": "2",
+              "represents": 2
+            },
+            {
+              "name": "Packet size",
+              "size": "16",
+              "represents": 5
+            },
+            {
+              "name": "Fragment",
+              "size": "16",
+              "represents": 2
+            },
+            {
+              "name": "Reserved",
+              "size": 1,
+              "represents": 2
+            },
+            {
+              "name": "DF",
+              "size": 1,
+              "represents": 2
+            },
+            {
+              "name": "MF",
+              "size": 1,
+              "represents": 2
+            },
+            {
+              "name": "Fragment offset",
+              "size": "13",
+              "represents": 0
+            },
+            {
+              "name": "TTL",
+              "size": "8",
+              "represents": 0
+            },
+            {
+              "name": "Protocol",
+              "size": "8",
+              "represents": 0
+            },
+            {
+              "name": "Checksum",
+              "size": "16",
+              "represents": 2
+            },
+            {
+              "name": "Source",
+              "size": "32",
+              "represents": 2
+            },
+            {
+              "name": "Destination",
+              "size": "32",
+              "represents": 2
+            },
+            {
+              "name": "Options",
+              "size": "function(f){return f['Header size']*32-160;}",
+              "represents": 2
+            },
+            {
+              "name": "Content",
+              "represents": 4,
+              "size": "-1"
+            }
+          ],
+          "checkFunctions": []
+        }
+      ],
+      "roles": []
+    },
+    {
+      "name": "Link",
+      "frames": [
+        {
+          "name": "Lo",
+          "fields": [
+            {
+              "name": "pftype",
+              "size": "32",
+              "represents": 2
+            },
+            {
+              "name": "Content",
+              "represents": 4,
+              "size": "-1"
+            }
+          ],
+          "checkFunctions": []
+        },
+        {
+          "name": "Ether",
+          "fields": [
+            {
+              "name": "Destination MAC",
+              "size": "48",
+              "represents": 2
+            },
+            {
+              "name": "Source MAC",
+              "size": "48",
+              "represents": 2
+            },
+            {
+              "name": "Ether type",
+              "size": "16",
+              "represents": 2
+            },
+            {
+              "name": "Content",
+              "represents": 4,
+              "size": "-1"
+            }
+          ],
+          "checkFunctions": []
+        }
+      ],
+      "roles": [],
+      "determineFrameType": "function(f){return ['Lo', 'Ether'][f['etherType']];}"
+    }, {
+      "name": "PcapHeader",
+      "frames": [
+        {
+          "name": "PcapPacket",
+          "fields": [
+            {
+              "name": "tv_sec",
+              "size": "64",
+              "represents": 0
+            },
+            {
+              "name": "tv_usec",
+              "size": "64",
+              "represents": 0
+            },
+            {
+              "name": "caplen",
+              "size": "32",
+              "represents": 0
+            },
+            {
+              "name": "len",
+              "size": "32",
+              "represents": 0
+            },
+            {
+              "name": "Content",
+              "represents": 4,
+              "size": "-1"
+            }
+          ],
+          "checkFunctions": []
+        }
+      ],
+      "roles": []
+    }
+  ]
+}

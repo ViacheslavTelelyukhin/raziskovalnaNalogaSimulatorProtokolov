@@ -14,6 +14,9 @@ import { rendererConfig } from './webpack.renderer.config';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    extraResource: [
+      "./src/sniffer/a.out",
+    ]
   },
   rebuildConfig: {},
   makers: [
@@ -33,6 +36,14 @@ const config: ForgeConfig = {
             html: './src/app/index.html',
             js: './src/renderer.ts',
             name: 'main_window',
+            preload: {
+              js: './src/preload.ts',
+            },
+          },
+          {
+            html: './src/app/stateFollower/index.html',
+            js: './src/app/stateFollower/renderer.ts',
+            name: 'state_follower_window',
             preload: {
               js: './src/preload.ts',
             },

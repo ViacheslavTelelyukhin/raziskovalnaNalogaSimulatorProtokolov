@@ -1724,11 +1724,6 @@
   dependencies:
     undici-types "~7.18.0"
 
-"@types/node@^10.0.0":
-  version "10.17.60"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.60.tgz#35f3d6213daed95da7f0f73e75bcc6980e90597b"
-  integrity sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==
-
 "@types/node@^22.5.5":
   version "22.19.15"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-22.19.15.tgz#6091d99fdf7c08cb57dc8b1345d407ba9a1df576"
@@ -5392,11 +5387,6 @@ mute-stream@^1.0.0:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-1.0.0.tgz#e31bd9fe62f0aed23520aa4324ea6671531e013e"
   integrity sha512-avsJQhyd+680gKXyG/sQc0nXaC6rBkPOfyHYcFb9+hdkqQkR9bdnkJ0AMZhke0oesPqIO+mFFJ+IdBc7mst4IA==
 
-nan@^2.14.0:
-  version "2.26.2"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.26.2.tgz#2e5e25764224c737b9897790b57c3294d4dcee9c"
-  integrity sha512-0tTvBTYkt3tdGw22nrAy50x7gpbGCCFH3AFcyS5WiUu7Eu4vWlri1woE6qHBSfy11vksDqkiwjOnlR7WV8G1Hw==
-
 nanoid@^3.3.11:
   version "3.3.11"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.11.tgz#4f4f112cefbe303202f2199838128936266d185b"
@@ -5829,14 +5819,6 @@ path-type@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
-
-pcap@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/pcap/-/pcap-3.1.0.tgz#da89ba48c936e0cd7e4613626b745b1e157052fb"
-  integrity sha512-bTmjruLZBmmlAc+wougRbKVzspUA4bqi505v70W/dQErmdiLs8n5pNc1Z41lj8TAkZG6GZD/1mMY0VC+uj/PBQ==
-  dependencies:
-    "@types/node" "^10.0.0"
-    nan "^2.14.0"
 
 pe-library@^1.0.1:
   version "1.0.1"

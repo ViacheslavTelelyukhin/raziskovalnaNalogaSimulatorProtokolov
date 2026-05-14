@@ -68,12 +68,24 @@ export function NetworkDeviceNode(props: any) {
 
 export function SystemStateNode(props: any) {
     const data = props.data
+    const deviceOrder = data.devices
     // console.log(props);
     return (<>
         <div className="automaton-state-node">
-            {data.label.split("§").map((ifState: string, i: number) => {
-                return <div key={i}>{ifState}</div>
-            })}
+            {(() => {
+                let index = 0, ret: any[] = [];
+                const interfaceNames = data.label.split("§")
+                deviceOrder.forEach((d: [string, number], i: number) => {
+                    ret.push(<div key={i} style={i !== deviceOrder.length-1 ? {borderBottom: 'black solid'} : {}}>
+                        <div style={{textAlign: 'left'}}>{d[0]}:</div>
+                        {interfaceNames.slice(index, index+d[1]).map((ifState: string, i: number) =>
+                            <div key={i}>{ifState}</div>
+                        )}
+                    </div>)
+                    index += d[1]
+                })
+                return ret
+            })()}
             <Handle style={{top: '50%', left: '50%', zIndex: -4}} type="source" position={Position.Top}/>
             <Handle style={{top: '50%', left: '50%', zIndex: -4}} type="target" position={Position.Top}/>
         </div>

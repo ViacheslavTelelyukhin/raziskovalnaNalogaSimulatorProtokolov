@@ -51,6 +51,9 @@ export default function Layers({proj, setPage, setProj}: Props) {
             roles: []
         }))
     }
+    const setLayer = (li: number, key: string, value: string) => {
+        setProj(createSetStateAction(['layers', li, key], value))
+    }
     const deleteLayer = (index: number) => {
         setProj(createSetStateAction(['layers', index], undefined))
     }
@@ -80,7 +83,7 @@ export default function Layers({proj, setPage, setProj}: Props) {
         setProj(createSetStateAction(['layers', index, 'frames', fi, 'fields', undefined], {
             name: name,
             represents: FIELD_TYPES.BITS,
-            size: 1
+            size: "1"
         } as frameField))
     }
     const editField = (index: number, fi: number, fieldIndex: number, key: keyof frameField, value: any) => {
@@ -308,6 +311,11 @@ export default function Layers({proj, setPage, setProj}: Props) {
                                 />
                             }
                         </div>}
+                    />
+                    <Input.TextArea
+                        placeholder="Determine frame type script (needed if there is multiple frame types)"
+                        onChange={e => setLayer(li, 'determineFrameType', e.target.value)}
+                        value={layer.determineFrameType || ''}
                     />
                     <EditList
                         margin={1}

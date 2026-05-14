@@ -118,7 +118,8 @@ export const executePgss = async (
         saveSimulation({
             name,
             nodes: balanceGraphStepSpring(nodes, edges, {max: 100, until: 5}).nodes, //balance graph once after generating it
-            edges
+            edges,
+            deviceOrder: network.devices.map(d => [d.name, d.interfaces.length])
         })
         resolve()
     })

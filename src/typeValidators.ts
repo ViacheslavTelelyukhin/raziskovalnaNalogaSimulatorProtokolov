@@ -50,6 +50,7 @@ function checkFn(fn:string) {
     let func;
     eval('func = '+fn)
     if (typeof func !== 'function') throw new Error('invalid function')
+    return true
   } catch {
     return false
   }

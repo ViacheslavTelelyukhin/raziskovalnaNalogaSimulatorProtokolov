@@ -29,11 +29,11 @@ export default function Simulations({proj, setPage, setProj}: Props) {
     const edit = (di: number, si: number) => {
         setDisplaying([di, si])
         const sim = proj.networks[di].simulations[si]
-        setNodes(sim.nodes)
+        setNodes(sim.nodes.map(node => ({...node, data: {...node.data, devices: sim.deviceOrder}}))) //don't save device order in each node for smaller archive
         setEdges(sim.edges)
     }
     const close = () => {
-        const newNodes = nodes
+        const newNodes = nodes.map(node => ({...node, data: {...node.data, devices: undefined}}))
         setProj(createSetStateAction(['networks', displaying[0], 'simulations', displaying[1], 'nodes'], newNodes))
         setNodes(null)
         setEdges(null)

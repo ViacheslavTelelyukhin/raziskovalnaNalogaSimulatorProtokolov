@@ -45,3 +45,26 @@ body {
   font-size: 0.7em;
   line-height: 1em;
 }
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: 100%; /* put it on the top */
+  background-color: yellow;
+  width: max-content;
+  opacity: 0;
+  -webkit-transition: opacity 0.25s ease-in-out;
+}
+
+[data-tooltip]:hover:after {
+  opacity: 1;
+}
+
+div[data-tooltip]:after {
+  left: 5px!important;
+}

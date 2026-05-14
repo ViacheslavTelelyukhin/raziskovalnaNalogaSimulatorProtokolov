@@ -6,11 +6,12 @@ import { IsFunction, IsNumberOrString, IsStringEnumRecord } from './typeValidato
 import { Edge, Node, Position } from '@xyflow/react';
 
 export enum FIELD_TYPES {
-    NUMBER,
-    STRING,
-    BITS,
-    FLOAT,
-    CONTENTS
+    NUMBER_LE = 0,
+    STRING = 1,
+    BITS = 2,
+    // FLOAT = 3,
+    CONTENTS = 4,
+    NUMBER_BE = 5,
 }
 export enum INTERFACE_INPUT_TYPES {
     ADDRESS
@@ -25,12 +26,19 @@ export enum IPC_CHANNELS {
 export enum IPC_METHODS {
     LIST_PROJECTS = 'listProjects',
     READ_FILE = 'readFile',
-    SAVE_FILE = 'saveFile'
+    SAVE_FILE = 'saveFile',
+    START_TRACE = 'startTrace',
+    GET_TRACING = 'getTracing'
 }
 export enum FLOW_NODE_TYPES {
     AUTOMATON_STATE = 'AS',
     NETWORK_DEVICE = 'ND',
     SYSTEM_STATE = 'SS'
+}
+
+export enum ETHERTYPES {
+    DLT_NULL = 0,
+    DLT_EN10MB = 1
 }
 
 export class project {
@@ -151,6 +159,7 @@ export class simulation {
     @IsString()
     name: string
 
+    deviceOrder: [string, number][]
     nodes: Node[]
     edges: Edge[]
 }
@@ -168,10 +177,12 @@ export class protocolLayer {
     @IsOptional()
     @Validate(IsFunction)
     //of type (props: {
-    // outer: Uint8Array,
-    // gotFromType: string, <- this is the key for the input value
-    // gotFromAddr: string, <- this is the val for the input value
-    // config: Record<string, string> <- this is the whole input config
+    // outer: Record<string, any>,
+    // etherType: number
+        //temporarily not passed
+        // gotFromType: string, <- this is the key for the input value
+        // gotFromAddr: string, <- this is the val for the input value
+        // config: Record<string, string> <- this is the whole input config
     // }) => keyof frames.name
     // We don't allow user to parse the frame because parsing needs to be properly configured beforehand
     determineFrameType?: string
@@ -239,7 +250,7 @@ export class frame {
 
     @IsArray()
     @Validate(IsFunction)
-    checkFunctions: string //these are saved as strings because we will eval them later
+    checkFunctions?: string[] //these are saved as strings because we will eval them later
     //((fields: frameField[]) => boolean)[] //checks if the frame is valid
 }
 
@@ -352,4 +363,12 @@ export interface simulationProgressType {
     abortFunction?: () => void
     foundStates: number
     done: boolean //only set to true when there are errors
+}
+
+export interface traceStart {
+    automaton: layerInterface[]
+    port: number
+    ip: string
+    name: string
+    filter?: string
 }
