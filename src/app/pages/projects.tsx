@@ -37,6 +37,7 @@ export default function Projects({proj, setProject, setPage}: Props) {
             protocolBase: {},
             scripts: []
         }
+        if (!newProjectName.match(/^[^~)('!*<>:;,?"*|/]+$/)) return notify("Invalid file name")
         saveFile(newProjectName+'.json', JSON.stringify(newProj))
             .catch(() => notify("Error occurred while trying to save project"))
             .then(() => {

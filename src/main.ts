@@ -79,13 +79,16 @@ ipcMain.handle(IPC_METHODS.LIST_PROJECTS, (event) => {
   })
 })
 
-ipcMain.handle(IPC_METHODS.SAVE_FILE, (event, name, content) => {
+ipcMain.handle(IPC_METHODS.SAVE_FILE, (event, name: string, content) => {
   return new Promise((resolve, reject) => {
     const appDataDirPath = getAppDataPath();
     if (!fs.existsSync(appDataDirPath)) {
       fs.mkdirSync(appDataDirPath);
     }
-    const appDataFilePath = path.join(appDataDirPath, name);
+    const appDataFilePath = path.join(
+      appDataDirPath,
+      name
+    );
     fs.writeFile(appDataFilePath, content, 'utf8', (err) => {
       if (err) return reject(err)
       resolve('success')
@@ -137,7 +140,7 @@ ipcMain.handle(IPC_METHODS.START_TRACE, (event, data: traceStart[], layers: prot
       
       w.loadURL(STATE_FOLLOWER_WINDOW_WEBPACK_ENTRY);
       // w.webContents.openDevTools();
-      const tracer = await getTracer(
+      const tracer: any = await getTracer(
         packet => w.webContents.send('packets', packet),
         (setEther as any),
         error => {
@@ -157,8 +160,8 @@ ipcMain.handle(IPC_METHODS.START_TRACE, (event, data: traceStart[], layers: prot
         //the process wil know to terminate
         //after our c code ends, the sudos and shells and the rest should clean themselves up
         //this is putting quite a bit of trust into the c proc though
-        tracer?.stdin?.write("KILL", err => {
-          if(err) console.error("Error while telling packet capture process tp shut down "+err)
+        tracer?.stdin?.write("KILL", (err: any) => {
+          if(err) console.error("Error while telling packet capture process to shut down "+err)
         })
       })
     }

@@ -1,3 +1,9 @@
+/*
+Odprite simulacijo z zajemom prometa v demoProjekt.json in v konzoli napičite node udpSend.js.
+Skripta bo iz na portu 10000 poslušala za udp sporočila in. izpisala njihovo vsebimo.
+Applikacija naj zajeme in dekasulira paket ter spremeni stanje elementa protokola.
+*/
+
 // import http from "http";
 
 // const server = http.createServer((req, res) => {
@@ -23,4 +29,4 @@ server.on('listening', () => {
   console.log(`Server listening ${address.address}:${address.port}`);
 });
 
-server.bind(10001);
+server.bind(10000);
